@@ -30,6 +30,14 @@ The tool works by modifying the browser environment. It overrites the native RTC
 * This will generate numerours `.png` files each giving out a graph for the specific parameter.
 * You may want to elimate graphs which represent no meaningful data.
 
+# Now the Default
+### Plotting webrtc-internals Data 
+* Create a Folder which will store all the generated plots.
+* Store all the data dumps generated from webrtc-internals page _(wont work on files generated from the tool)_ in a new folder.
+* Open a terminal inside the folder and run the script using python.
+
+        python scripts/plotInternals.py <Path to Folder Containing data dumps> <Path to save generated Plots>
+* Again numerous `.png` files representing time series graphs will be generated. YOu may want to discard cases which represent no meaningful data.
 
 # LICENSE
 MIT
