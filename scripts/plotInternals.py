@@ -1,3 +1,4 @@
+from genericpath import isfile
 import os
 import json
 import sys
@@ -33,7 +34,7 @@ desiredParams = {
         "-[framesDecoded/s]",
         "-framesDropped",
     ],
-    
+
     "RTCMediaStreamTrack_receiver":
     [
         "-framesReceived",
@@ -93,25 +94,35 @@ def sortTimeStamps(dir: str):
 
 
 # Generate a vertically stacked plot with a common time axis
-def plotStacked(data, title):
+def plotStacked(data, title, fileName = ""):
     N = len(data)
 
-    print(title + ": ", N)
+    if N > 1:
+        fig, ax = plt.subplots(nrows=N, sharex=True)
+    
+        fig.suptitle(title)
+    
+        plt.subplots_adjust(hspace=0.01)  # Vertical Spacing between the plots
+        plt.xlabel("Time (sec)")
+        for i in range(N):
+            ax[i].set_ylabel(f"Test: {N - i - 1}")
+            ax[i].grid()
+            ax[i].plot(data[N - i - 1])
+    
+        filename = "".join(i for i in title if i not in "\/:*?<>|")
+        plt.savefig(filename + ".png")
+        plt.close()
+    else:
+        plt.suptitle(title)
+        plt.xlabel("Time (sec)")
+        plt.ylabel(title)
+        
+        plt.plot(data[0])
 
-    fig, ax = plt.subplots(nrows=N, sharex=True)
-
-    fig.suptitle(title)
-
-    plt.subplots_adjust(hspace=0.01)  # Vertical Spacing between the plots
-    plt.xlabel("Time (sec)")
-    for i in range(N):
-        ax[i].set_ylabel(f"Test: {N - i - 1}")
-        ax[i].grid()
-        ax[i].plot(data[N - i - 1])
-
-    filename = "".join(i for i in title if i not in "\/:*?<>|")
-    plt.savefig(filename + ".png")
-    plt.close()
+        filename = fileName + "".join(i for i in title if i not in "\/:*?<>|") + ".png"
+        plt.savefig(filename)
+        plt.close()
+        
 
 
 # Some helpers for mapping a param name to what it actaully contains
@@ -161,19 +172,48 @@ def loadDir(dirName: str):
 
 
 if __name__ == "__main__":
-    if (len(sys.argv) != 3):
-        print(f"usage: {sys.argv[0]} <DATA DIR> <TARGET DIR>")
+    if (len(sys.argv) < 3):
+        print(f"usage: {sys.argv[0]} <DATA DIR> <TARGET DIR>\n")
         exit(1)
 
-    DATADIR = sys.argv[1]
+    DATAPATH = sys.argv[1]
     TARGETDIR = sys.argv[2]
 
-    currDir = os.getcwd()
-    allData = loadDir(DATADIR)
-    os.chdir(currDir)
+    allData = {}
 
-    os.chdir(TARGETDIR)
+    isFile = os.path.isfile(DATAPATH)
+
+
+    # Stacked Plots for all inside a directory.
+    if(os.path.isdir(DATAPATH)):
+        currDir = os.getcwd()
+        allData = loadDir(DATAPATH)
+        os.chdir(currDir)
+        # Create the output directory
+        if not os.path.exists(TARGETDIR):
+            os.mkdir(TARGETDIR)
+        os.chdir(TARGETDIR)
+
+
+    # Data from a single file.
+    else:
+        fileData = loadFile(DATAPATH)
+        allData = mergeCommons([fileData])
+        fileName = os.path.basename(DATAPATH).split(".")[0]
+
+        if not os.path.exists(TARGETDIR):
+                os.mkdir(TARGETDIR)
+        os.chdir(TARGETDIR)
+        if not os.path.exists(fileName):
+            os.mkdir(fileName)
+        os.chdir(fileName)        
+
+
     for param in allData.keys():
         n = len(allData[param])
+        print(param[0] + param[1] + ":" , n)
         if n > 0:
-            plotStacked(allData[param], param[0] + param[1])
+            if(isfile):
+                plotStacked(allData[param], param[0] + param[1])
+            else:
+                plotStacked(allData[param], param[0] + param[1])
