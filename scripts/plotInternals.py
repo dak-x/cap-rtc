@@ -1,7 +1,6 @@
 import os
 import json
 import sys
-import pprint
 import matplotlib
 
 import matplotlib.pyplot as plt
@@ -19,29 +18,31 @@ desiredParams = {
 
     "RTCInboundRTPVideoStream":
     [
-        "jitter",
-        "packetsLost",
+        "-jitter",
+        "-packetsLost",
         "-packetsReceived",
-        "[packetsReceived/s]",
+        "-[packetsReceived/s]",
         "-bytesReceived",
-        "[bytesReceived_in_bits/s]",
-        "framesReceived",
-        "-[framesReceived/s]",
-        "frameWidth",
-        "frameHeight",
-        "framesPerSecond",
+        "-[bytesReceived_in_bits/s]",
+        # "-framesReceived",
+        # "-[framesReceived/s]",
+        "-frameWidth",
+        "-frameHeight",
+        "-framesPerSecond",
         "-framesDecoded",
-        "[framesDecoded/s]",
-        "framesDropped",
+        "-[framesDecoded/s]",
+        "-framesDropped",
     ],
-
+    
     "RTCMediaStreamTrack_receiver":
     [
-        "freezeCount*",
-        "pauseCount*",
-        "totalFreezesDuration*",
-        "totalPausesDuration*",
-        "totalFramesDuration*",
+        "-framesReceived",
+        "-[framesReceived/s]",
+        "-freezeCount*",
+        "-pauseCount*",
+        "-totalFreezesDuration*",
+        "-totalPausesDuration*",
+        "-totalFramesDuration*",
     ]
 
 }
@@ -94,6 +95,9 @@ def sortTimeStamps(dir: str):
 # Generate a vertically stacked plot with a common time axis
 def plotStacked(data, title):
     N = len(data)
+
+    print(title + ": ", N)
+
     fig, ax = plt.subplots(nrows=N, sharex=True)
 
     fig.suptitle(title)
@@ -107,6 +111,7 @@ def plotStacked(data, title):
 
     filename = "".join(i for i in title if i not in "\/:*?<>|")
     plt.savefig(filename + ".png")
+    plt.close()
 
 
 # Some helpers for mapping a param name to what it actaully contains
@@ -171,5 +176,4 @@ if __name__ == "__main__":
     for param in allData.keys():
         n = len(allData[param])
         if n > 0:
-            plotStacked(allData[param], param[0] + "-" + param[1])
-    
+            plotStacked(allData[param], param[0] + param[1])
