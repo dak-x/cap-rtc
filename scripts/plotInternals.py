@@ -93,22 +93,40 @@ def sortTimeStamps(dir: str):
     return files
 
 
+# Computes the Average Value to Plot on top of the stack.
+def computeAverage(data):
+    N = len(data)
+    T = min(len(x) for x in data)
+    avg = []
+    for t in range(T):
+        s = 0.0
+        for i in range(N):
+            s += data[i][t]
+        avg.append(s/N)
+    return avg
+
 # Generate a vertically stacked plot with a common time axis
-def plotStacked(data, title, fileName = ""):
+
+
+def plotStacked(data, title, fileName=""):
     N = len(data)
 
     if N > 1:
-        fig, ax = plt.subplots(nrows=N, sharex=True)
-    
+        fig, ax = plt.subplots(nrows=(N + 1), sharex=True)
+
         fig.suptitle(title)
-    
+
         plt.subplots_adjust(hspace=0.01)  # Vertical Spacing between the plots
         plt.xlabel("Time (sec)")
         for i in range(N):
-            ax[i].set_ylabel(f"Test: {N - i - 1}")
-            ax[i].grid()
-            ax[i].plot(data[N - i - 1])
-    
+            ax[i + 1].set_ylabel(f"Test: {N - i - 1}")
+            ax[i + 1].grid()
+            ax[i + 1].plot(data[N - i - 1])
+
+        ax[0].set_ylabel("Average: ")
+        ax[0].grid()
+        ax[0].plot(computeAverage(data))
+
         filename = "".join(i for i in title if i not in "\/:*?<>|")
         plt.savefig(filename + ".png")
         plt.close()
@@ -116,13 +134,13 @@ def plotStacked(data, title, fileName = ""):
         plt.suptitle(title)
         plt.xlabel("Time (sec)")
         plt.ylabel(title)
-        
+
         plt.plot(data[0])
 
-        filename = fileName + "".join(i for i in title if i not in "\/:*?<>|") + ".png"
+        filename = fileName + \
+            "".join(i for i in title if i not in "\/:*?<>|") + ".png"
         plt.savefig(filename)
         plt.close()
-        
 
 
 # Some helpers for mapping a param name to what it actaully contains
@@ -183,7 +201,6 @@ if __name__ == "__main__":
 
     isFile = os.path.isfile(DATAPATH)
 
-
     # Stacked Plots for all inside a directory.
     if(os.path.isdir(DATAPATH)):
         currDir = os.getcwd()
@@ -194,7 +211,6 @@ if __name__ == "__main__":
             os.mkdir(TARGETDIR)
         os.chdir(TARGETDIR)
 
-
     # Data from a single file.
     else:
         fileData = loadFile(DATAPATH)
@@ -202,16 +218,15 @@ if __name__ == "__main__":
         fileName = os.path.basename(DATAPATH).split(".")[0]
 
         if not os.path.exists(TARGETDIR):
-                os.mkdir(TARGETDIR)
+            os.mkdir(TARGETDIR)
         os.chdir(TARGETDIR)
         if not os.path.exists(fileName):
             os.mkdir(fileName)
-        os.chdir(fileName)        
-
+        os.chdir(fileName)
 
     for param in allData.keys():
         n = len(allData[param])
-        print(param[0] + param[1] + ":" , n)
+        print(param[0] + param[1] + ":", n)
         if n > 0:
             if(isfile):
                 plotStacked(allData[param], param[0] + param[1])

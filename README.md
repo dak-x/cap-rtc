@@ -36,8 +36,12 @@ The tool works by modifying the browser environment. It overrites the native RTC
 * Store all the data dumps generated from webrtc-internals page _(wont work on files generated from the tool)_ in a new folder.
 * Open a terminal inside the folder and run the script using python.
 
-        python scripts/plotInternals.py <Path to Folder Containing data dumps> <Path to save generated Plots>
+        python scripts/plotInternals.py <Path to Dir Containing data dumps> <Dir to save generated Plots>
 * Again numerous `.png` files representing time series graphs will be generated. YOu may want to discard cases which represent no meaningful data.
+* To plot all the graphs corresponding to a data-dump file use:
+
+        python scripts/plotInternals.py <Path to Data Dump File> <Plot Dir>
+* This will generate all the plots and save them inside `<Plot Dir>/<Name of Data File>/`
 
 # LICENSE
 MIT
