@@ -3,7 +3,7 @@ import os
 import json
 import sys
 import matplotlib
-
+import statistics as stats
 import matplotlib.pyplot as plt
 
 # All the required Stats
@@ -113,7 +113,6 @@ def plotStacked(data, title, fileName=""):
 
     if N > 1:
         fig, ax = plt.subplots(nrows=(N + 1), sharex=True)
-
         fig.suptitle(title)
 
         plt.subplots_adjust(hspace=0.01)  # Vertical Spacing between the plots
@@ -121,16 +120,21 @@ def plotStacked(data, title, fileName=""):
         for i in range(N):
             ax[i + 1].set_ylabel(f"Test: {N - i - 1}")
             ax[i + 1].grid()
-            ax[i + 1].plot(data[N - i - 1])
+            ax[i + 1].plot(data[N - i - 1], lw=1)
+
+        average = computeAverage(data)
 
         ax[0].set_ylabel("Average: ")
         ax[0].grid()
-        ax[0].plot(computeAverage(data))
+        ax[0].scatter([x for x in range(len(average))],
+                      average, marker="x", lw=1)
 
         filename = "".join(i for i in title if i not in "\/:*?<>|")
         plt.savefig(filename + ".png")
         plt.close()
+
     else:
+
         plt.suptitle(title)
         plt.xlabel("Time (sec)")
         plt.ylabel(title)
@@ -141,6 +145,56 @@ def plotStacked(data, title, fileName=""):
             "".join(i for i in title if i not in "\/:*?<>|") + ".png"
         plt.savefig(filename)
         plt.close()
+
+
+def percentile90(data):
+    data = data[:]
+    data.sort()
+    nthObject = int(len(data) * 9 / 10)
+    return data[nthObject - 1]
+
+
+def stackedWithAvg(data, title, fileName=""):
+    N = len(data)
+
+    # Vertical Spacing between the plots
+    plt.subplots_adjust(hspace=0.01, wspace=0.3)
+    plt.suptitle(title)
+
+    ax = plt.subplot2grid((N, 2), (N-1, 0), colspan=1)
+    ax.plot(data[0], lw=1)
+    ax.grid(axis='y')
+    ax.set_ylabel("Test: 0")
+    ax.set_xlabel("Time (sec)")
+    for i in range(N-1):
+
+        axi = plt.subplot2grid((N, 2), (N-i-2, 0), colspan=1, sharex=ax)
+        axi.plot(data[i+1], lw=1)
+        axi.grid()
+        axi.get_xaxis().set_visible(False)
+        axi.set_ylabel(f"Test: {i+1}")
+
+    # Plotting the Average.
+
+    avgData = list(map(stats.mean, data))
+    sdData = list(map(stats.stdev, data))
+    pcntData = list(map(percentile90, data))
+    oneToN = list(f"{i}" for i in range(N))
+
+    ax = plt.subplot2grid((N, 2), (0, 1), rowspan=N)
+    # ax.bar(list(f"{i}" for i in range(N)), avgData, lw=0.3)
+    ax.scatter(oneToN, avgData, marker='x', color="red")
+    ax.scatter(oneToN, sdData, marker='^', color="blue")
+    ax.scatter(oneToN, pcntData, marker='.', color='g' )
+
+    ax.set_ylabel("Average: ")
+    ax.set_xlabel("Tests")
+
+    # plt.show()
+
+    filename = "".join(i for i in title if i not in "\/:*?<>|")
+    plt.savefig(filename + ".png")
+    plt.close()
 
 
 # Some helpers for mapping a param name to what it actaully contains
@@ -229,6 +283,6 @@ if __name__ == "__main__":
         print(param[0] + param[1] + ":", n)
         if n > 0:
             if(isfile):
-                plotStacked(allData[param], param[0] + param[1])
+                stackedWithAvg(allData[param], param[0] + param[1])
             else:
                 plotStacked(allData[param], param[0] + param[1])
