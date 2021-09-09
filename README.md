@@ -22,7 +22,7 @@ The tool works by modifying the browser environment. It overrites the native RTC
 * To gather the statistics, reconnect your device and the console. Inspect the same webpage on which the RTC App is open.
 * Type `DownloadData()` into the console. The `data.json` file will start downloading on your deive. ( You might get a pop-up on the device for Download based on your permissions.)
   
-### Plotting the Data:
+### Plotting the Data: (deprecated)
 * Create a New Folder. Copy the `plot.py` and `data.json` inside it. 
 * Open a terminal inside the folder and run the script using python.
   
@@ -42,6 +42,18 @@ The tool works by modifying the browser environment. It overrites the native RTC
 
         python scripts/plotInternals.py <Path to Data Dump File> <Plot Dir>
 * This will generate all the plots and save them inside `<Plot Dir>/<Name of Data File>/`
+* 
+
+### Creating CSV Data File
+* To create a csv file :
+
+        python scripts/rawData.py <Path to webrtc dump> <Path to New Data File>
+* This will generate a csv/ excel file for the data in the format 
+
+
+        param1, param2, ....
+        data1, data2 ...
+        data1, data2 ...
 
 # LICENSE
 MIT
